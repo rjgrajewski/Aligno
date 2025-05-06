@@ -1,0 +1,71 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+/* Global Dark Mode */
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+.dash-core-components, .dash-layout, .css-1d391kg, .dash-graph-container, .dash-graph {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+.sidebar, .sidebar .sidebar-content {
+  background-color: #373737;
+  color: #e0e0e0;
+  height: 100vh;
+  overflow-y: auto;
+}
+a, .dash-link {
+  color: #82aaff;
+}
+
+#badge-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  
+  .skill-badge {
+    background-color: #005500;
+    color: #22ff00;
+    border: none;
+  }
+    .skill-badge:hover {
+        background-color: #550000;
+        color: #ff0000;
+        border: none;
+        /* opacity: 0.5; */
+    }
+
+/* Ensure dropdown menu options are readable in dark mode */
+.Select-menu-outer,
+.VirtualizedSelectMenu,
+.VirtualizedSelectOption {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+.VirtualizedSelectOption.is-focused,
+.VirtualizedSelectOption:hover {
+  background-color: #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Dark theme for Dash DataTable */
+.dash-spreadsheet-container .dash-spreadsheet-inner {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+.dash-spreadsheet-container .dash-cell {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+.dash-spreadsheet-container .dash-cell.is-selected {
+  background-color: #333333 !important;
+}
+.dash-spreadsheet-container .dash-header .column-header--name {
+  background-color: #333333 !important;
+  color: #e0e0e0 !important;
+}
