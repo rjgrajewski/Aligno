@@ -24,45 +24,57 @@ df = load_data(CSV_PATH)
 all_skills = sorted({skill for skills in df['skills_list'] for skill in skills})
 
 # --- Dash app setup ---
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
-app.title = "Job Finder"
+app = dash.Dash(__name__)
+with open("assets/index_template.html", "r") as f:
+    app.index_string = f.read()
+    
+app.title = "Aligno"
 
 app.layout = dbc.Container([
+    # Row 1: Header
     dbc.Row([
         dbc.Col([
-            html.H4("💪 Your skills:"),
+            html.H1("Aligno"),
+            html.H4("Search smarter")
+        ], width=12, className="header")
+    ]),
+    
+    # Row 2: Main Content
+    dbc.Row([
+        # Left Column: Filters
+        dbc.Col([
+            html.H4("Your skills. Your preferences."),
             html.Div(id="badge-container"),
-
             html.Hr(),
-
-            html.H5("What's more? Click to add:"),
+            html.H5("Add a skill:"),
             dcc.Dropdown(
                 id="skill-dropdown",
                 options=[{"label": s, "value": s} for s in all_skills],
                 placeholder="Choose a skill",
                 clearable=False
             ),
-            dcc.Store(id="selected-skills", data=[]),
-        ], width=3, style={"backgroundColor": "#2e2e2e", "margin": "1rem"}),
+            dcc.Store(id="selected-skills", data=[])
+        ], width=4, className="filters"),
 
+        # Right Column: Job Offers
         dbc.Col([
-            html.H1("🔍 Interactive Job Report"),
-            html.H4(id="found-count"),
+            html.H4("Your next job."),
+            html.H5(id="found-count"),
             dash_table.DataTable(
                 id="offers-table",
                 columns=[
-                    {"name":"Title","id":"Job Title"},
-                    {"name":"Company","id":"Company"},
-                    {"name":"Location","id":"Location"},
-                    {"name":"Score","id":"match_score"}
+                    {"name": "Title", "id": "Job Title"},
+                    {"name": "Company", "id": "Company"},
+                    {"name": "Location", "id": "Location"},
+                    {"name": "Score", "id": "match_score"}
                 ],
                 data=[],
                 page_size=10,
-                style_header={"fontWeight":"bold"},
-                style_cell={"textAlign":"left"},
+                style_header={"fontWeight": "bold"},
+                style_cell={"textAlign": "left"}
             )
-        ], width=9)
-    ], style={"height": "100vh"})  # Set row height to full viewport height
+        ], width=8)
+    ])
 ], fluid=True)
 
 
@@ -107,15 +119,6 @@ def update_report(skills):
                 className="skill-badge"
             )
         )
-
-    # 2) Filtrowanie i punktacja
-    df2 = df.copy()
-    df2["match_score"] = df2["skills_list"].apply(lambda row: match_score(skills, row))
-    filtered = df2[df2["match_score"] > 0].sort_values("match_score", ascending=False)
-    data = filtered[["ID","Job Title","Company","Location","match_score"]].to_dict("records")
-
-    return badges, data, f"Found {len(filtered)} matching offers"
-
 
 if __name__ == "__main__":
     app.run(debug=True, dev_tools_hot_reload=True)

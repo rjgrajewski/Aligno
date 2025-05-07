@@ -1,6 +1,6 @@
-# Project: Interactive Job Report
+# Project: Aligno
 
-**Interactive dashboard to explore scraped job offers and filter them by your skills.**
+**Your skills. Your Preferences. Your next job.**
 
 ---
 
