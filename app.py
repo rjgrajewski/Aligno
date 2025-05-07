@@ -24,7 +24,7 @@ df = load_data(CSV_PATH)
 all_skills = sorted({skill for skills in df['skills_list'] for skill in skills})
 
 # --- Dash app setup ---
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 with open("assets/index_template.html", "r") as f:
     app.index_string = f.read()
     
@@ -34,45 +34,51 @@ app.layout = dbc.Container([
     # Row 1: Header
     dbc.Row([
         dbc.Col([
-            html.H1("Aligno"),
-            html.H4("Search smarter")
-        ], width=12, className="header")
+            html.H1("🔎 Aligno"),
+            html.H4([
+                html.Em("Search smarter.")
+            ])
+        ], className="header")
     ]),
     
     # Row 2: Main Content
     dbc.Row([
         # Left Column: Filters
         dbc.Col([
-            html.H4("Your skills. Your preferences."),
-            html.Div(id="badge-container"),
-            html.Hr(),
-            html.H5("Add a skill:"),
-            dcc.Dropdown(
-                id="skill-dropdown",
-                options=[{"label": s, "value": s} for s in all_skills],
-                placeholder="Choose a skill",
-                clearable=False
-            ),
-            dcc.Store(id="selected-skills", data=[])
-        ], width=4, className="filters"),
+            html.Div(className="content-box", children=[
+                html.H4("Your skills. Your preferences."),
+                html.Div(id="badge-container"),
+                html.Hr(),
+                html.H5("Add a skill:"),
+                dcc.Dropdown(
+                    id="skill-dropdown",
+                    options=[{"label": s, "value": s} for s in all_skills],
+                    placeholder="Choose a skill",
+                    clearable=False
+                ),
+                dcc.Store(id="selected-skills", data=[])
+            ])
+        ], width=4),
 
         # Right Column: Job Offers
         dbc.Col([
-            html.H4("Your next job."),
-            html.H5(id="found-count"),
-            dash_table.DataTable(
-                id="offers-table",
-                columns=[
-                    {"name": "Title", "id": "Job Title"},
-                    {"name": "Company", "id": "Company"},
-                    {"name": "Location", "id": "Location"},
-                    {"name": "Score", "id": "match_score"}
-                ],
-                data=[],
-                page_size=10,
-                style_header={"fontWeight": "bold"},
-                style_cell={"textAlign": "left"}
-            )
+            html.Div(className="content-box", children=[
+                html.H4("Your next job."),
+                html.H5(id="found-count"),
+                dash_table.DataTable(
+                    id="offers-table",
+                    columns=[
+                        {"name": "Title", "id": "Job Title"},
+                        {"name": "Company", "id": "Company"},
+                        {"name": "Location", "id": "Location"},
+                        {"name": "Score", "id": "match_score"}
+                    ],
+                    data=[],
+                    # pagination removed
+                    style_header={"fontWeight": "bold"},
+                    style_cell={"textAlign": "left"}
+                )
+            ])
         ], width=8)
     ])
 ], fluid=True)
@@ -115,10 +121,28 @@ def update_report(skills):
         badges.append(
             dbc.Button(
                 f"{s}",
-                id={"type":"remove-btn", "index":s},
+                id={"type": "remove-btn", "index": s},
                 className="skill-badge"
             )
         )
+
+    # Filtrowanie danych
+    filtered = df.copy()
+    if skills:
+        filtered["match_score"] = df["skills_list"].apply(lambda row: match_score(skills, row))
+        filtered = filtered[filtered["match_score"] > 0]
+        filtered = filtered.sort_values(by="match_score", ascending=False)
+    else:
+        filtered["match_score"] = 0
+        filtered = filtered.head(0)
+
+    # Przygotowanie danych do tabeli
+    offers_data = filtered[["Job Title", "Company", "Location", "match_score"]].to_dict("records")
+
+    # Tekst o liczbie dopasowań
+    found_text = f"{len(filtered)} matches found" if skills else "No skills selected"
+
+    return badges, offers_data, found_text
 
 if __name__ == "__main__":
     app.run(debug=True, dev_tools_hot_reload=True)
